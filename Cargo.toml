@@ -1,6 +1,6 @@
 [package]
 name = "wasmvault"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["WasmVault Team"]
 description = "A security-first package manager for executable WASM capabilities, built in Rust."

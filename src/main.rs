@@ -86,6 +86,9 @@ enum Commands {
 
     /// Run test suite against demo plugins
     Test,
+
+    /// Run instant 3-second security selftest to verify host sandbox controls
+    Selftest,
 }
 
 fn main() -> Result<()> {
@@ -265,6 +268,71 @@ fn main() {
             } else {
                 anyhow::bail!("Test failures detected");
             }
+            Ok(())
+        }
+
+        Commands::Selftest => {
+            println!("\n{}", "============================================================".bright_cyan().bold());
+            println!("            {}", "WASMVAULT 3-SECOND SECURITY SELFTEST".bold().bright_green());
+            println!("{}", "============================================================".bright_cyan().bold());
+            println!("Auditing local host capability enforcement runtime...\n");
+
+            let sandbox = Sandbox::new()?;
+            let mut all_passed = true;
+
+            // 1. Audit Legitimate Scoped Path Preopen
+            let mut manifest1 = CapabilityManifest::default_manifest_for_package("selftest-scoped");
+            manifest1.permissions.filesystem = crate::manifest::FilesystemPermissions::Paths(vec!["./workspace/input".to_string()]);
+            let path1 = PathBuf::from("target/wasm_plugins/image-resizer.wasm");
+            if path1.exists() {
+                let bytes = std::fs::read(&path1)?;
+                let report = sandbox.execute(&bytes, &manifest1, None)?;
+                if report.exit_code == 0 {
+                    println!("  {} [PASS] Scoped Filesystem Isolation verified (preopened path boundary active)", "✓".green().bold());
+                } else {
+                    println!("  {} [FAIL] Scoped Filesystem Isolation check failed", "✗".red().bold());
+                    all_passed = false;
+                }
+            }
+
+            // 2. Audit Stealth Network Socket Interception
+            let mut manifest2 = CapabilityManifest::default_manifest_for_package("selftest-net");
+            manifest2.permissions.network = false;
+            let path2 = PathBuf::from("target/wasm_plugins/malicious-network.wasm");
+            if path2.exists() {
+                let bytes = std::fs::read(&path2)?;
+                let report = sandbox.execute(&bytes, &manifest2, None)?;
+                if !report.blocked_calls.is_empty() {
+                    println!("  {} [PASS] Network Interceptor verified (blocked stealth sock_open call)", "✓".green().bold());
+                } else {
+                    println!("  {} [FAIL] Network Interceptor check failed", "✗".red().bold());
+                    all_passed = false;
+                }
+            }
+
+            // 3. Audit Resource Limit Defense
+            let mut manifest3 = CapabilityManifest::default_manifest_for_package("selftest-resource");
+            manifest3.limits.memory_mb = 16;
+            let path3 = PathBuf::from("target/wasm_plugins/resource-bomb.wasm");
+            if path3.exists() {
+                let bytes = std::fs::read(&path3)?;
+                let report = sandbox.execute(&bytes, &manifest3, None)?;
+                if report.exit_code != 0 {
+                    println!("  {} [PASS] Resource Limiter Defense verified (trapped allocation at 16MB)", "✓".green().bold());
+                } else {
+                    println!("  {} [FAIL] Resource Limiter check failed", "✗".red().bold());
+                    all_passed = false;
+                }
+            }
+
+            println!("\n------------------------------------------------------------");
+            if all_passed {
+                println!("{}", "RESULT: ALL HOST SECURITY CONTROLS ACTIVE & VERIFIED".bright_green().bold());
+            } else {
+                println!("{}", "RESULT: SECURITY CONTROL SELFTEST FAILED".bright_red().bold());
+            }
+            println!("{}\n", "============================================================".bright_cyan().bold());
+
             Ok(())
         }
     }

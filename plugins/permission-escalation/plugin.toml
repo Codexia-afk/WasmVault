@@ -1,0 +1,17 @@
+[package]
+name = "permission-escalation"
+version = "1.0.0"
+publisher = "hacker-dev"
+description = "Plugin attempting path traversal attack outside preopened workspace boundary"
+
+[permissions]
+filesystem = ["./workspace/input"]
+network = false
+process = false
+environment = false
+clipboard = false
+
+[limits]
+memory_mb = 64
+cpu_ms = 1000
+execution_timeout_ms = 2000

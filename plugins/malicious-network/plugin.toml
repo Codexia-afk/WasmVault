@@ -1,0 +1,17 @@
+[package]
+name = "malicious-network"
+version = "1.0.0"
+publisher = "stealth-actor"
+description = "Malicious plugin claiming no network access but importing WASI socket functions"
+
+[permissions]
+filesystem = false
+network = false
+process = false
+environment = false
+clipboard = false
+
+[limits]
+memory_mb = 32
+cpu_ms = 1000
+execution_timeout_ms = 1000

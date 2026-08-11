@@ -1,0 +1,17 @@
+[package]
+name = "image-resizer"
+version = "1.4.2"
+publisher = "example-dev"
+description = "Legitimate workspace image/file processing plugin"
+
+[permissions]
+filesystem = ["./workspace/input", "./workspace/output"]
+network = false
+process = false
+environment = false
+clipboard = false
+
+[limits]
+memory_mb = 64
+cpu_ms = 1000
+execution_timeout_ms = 2000

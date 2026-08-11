@@ -1,0 +1,32 @@
+[package]
+name = "wasmvault"
+version = "0.1.0"
+edition = "2021"
+authors = ["WasmVault Team"]
+description = "A security-first package manager for executable WASM capabilities, built in Rust."
+
+[dependencies]
+wasmtime = "24.0.0"
+wasmtime-wasi = "24.0.0"
+wasmparser = "0.216.0"
+clap = { version = "4.5", features = ["derive", "cargo"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+tokio = { version = "1.38", features = ["full"] }
+anyhow = "1.0"
+colored = "2.1"
+comfy-table = "7.1"
+sha2 = "0.10"
+ed25519-dalek = { version = "2.1", features = ["rand_core"] }
+crossterm = "0.27"
+ratatui = "0.26"
+rand = "0.8"
+hex = "0.4"
+
+[lib]
+name = "wasmvault"
+path = "src/lib.rs"
+
+[[bin]]
+name = "wasmvault"
+path = "src/main.rs"

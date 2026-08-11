@@ -1,0 +1,17 @@
+[package]
+name = "resource-bomb"
+version = "1.0.0"
+publisher = "malicious-dev"
+description = "Plugin attempting CPU infinite loop and memory allocation explosion"
+
+[permissions]
+filesystem = false
+network = false
+process = false
+environment = false
+clipboard = false
+
+[limits]
+memory_mb = 16
+cpu_ms = 300
+execution_timeout_ms = 500

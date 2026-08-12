@@ -5,10 +5,11 @@
 [![Rust 1.97+](https://img.shields.io/badge/Rust-1.97%2B-orange.svg?style=flat-square&logo=rust)](https://www.rust-lang.org/)
 [![Wasmtime 24.0](https://img.shields.io/badge/Wasmtime-24.0.0-blue.svg?style=flat-square&logo=webassembly)](https://wasmtime.dev/)
 [![WASI Target](https://img.shields.io/badge/WASI-wasm32--wasip1-green.svg?style=flat-square)](https://wasi.dev/)
+[![Apple Silicon](https://img.shields.io/badge/macOS-Apple%20Silicon%20(aarch64)-blue.svg?style=flat-square&logo=apple)](https://apple.com/)
 [![Version](https://img.shields.io/badge/Version-v0.2.0-brightgreen.svg?style=flat-square)](https://github.com/Codexia-afk/WasmVault/releases)
 [![License](https://img.shields.io/badge/License-MIT-brightgreen.svg?style=flat-square)](LICENSE)
 
-*Keywords: WebAssembly Package Manager, WASI Sandbox, Rust Security Tool, Zero-Trust Execution, Wasmtime Engine, Plugin Security, MicroVM Alternative, Sub-10ms Isolation.*
+*Keywords: WebAssembly Package Manager, WASI Sandbox, Rust Security Tool, Zero-Trust Execution, Wasmtime Engine, Plugin Security, MicroVM Alternative, Sub-10ms Isolation, Apple Silicon Native.*
 
 ---
 
@@ -135,26 +136,30 @@ Intercepts unauthorized host calls, streams `MonitorEvent` notifications, and re
 ## 💻 Quickstart & Installation Guide
 
 ### Prerequisites
-- **Rust 1.97+** (`cargo`, `rustc`)
+- **Rust 1.97+** (`cargo`, `rustc`) - Supported natively on macOS (Apple Silicon `aarch64-apple-darwin` / Intel `x86_64`), Linux, and Windows.
 - **WASI Compilation Target**:
   ```bash
   rustup target add wasm32-wasip1
   ```
 
-### Build & Run
+### Quickstart (macOS / Linux / Windows)
 ```bash
-# Clone WasmVault
+# 1. Clone repository & enter workspace
 git clone https://github.com/Codexia-afk/WasmVault.git
 cd WasmVault
 
-# Build optimized release binary
+# 2. Build optimized release binary
 cargo build --release
 
-# Run host security selftest
+# 3. Run instant 3-second host capability selftest
 ./target/release/wasmvault selftest
 
-# Compile demo attack simulation plugins
+# 4. Compile demo attack simulation plugins
 ./scripts/build_plugins.sh
+
+# 5. Inspect static imports & run in sandbox
+./target/release/wasmvault inspect target/wasm_plugins/malicious-network.wasm
+./target/release/wasmvault run target/wasm_plugins/malicious-network.wasm
 ```
 
 ---
@@ -184,7 +189,33 @@ wasmvault test                          # Run automated integration test suite
 
 ## 🧪 Demonstration & Attack Simulation Suite
 
-### 1. Static Scanner Mismatch Detection (`wasmvault inspect malicious-network.wasm`)
+### 1. Host Runtime Security Selftest (`wasmvault selftest`)
+```text
+============================================================
+            WASMVAULT 3-SECOND SECURITY SELFTEST
+============================================================
+Auditing local host capability enforcement runtime...
+
+[image-resizer] Starting image processing plugin in WASI sandbox...
+[image-resizer] Read input file successfully (27 bytes)
+[image-resizer] Failed to write output: No such file or directory (os error 44)
+  ✓ [PASS] Scoped Filesystem Isolation verified (preopened path boundary active)
+[malicious-network] Attempting stealth network socket creation...
+[malicious-network] Socket creation call returned error code: 76
+  ✓ [PASS] Network Interceptor verified (blocked stealth sock_open call)
+[resource-bomb] Starting CPU loop and memory allocation attack...
+[resource-bomb] Allocated 1 MB memory...
+[resource-bomb] Allocated 6 MB memory...
+[resource-bomb] Allocated 11 MB memory...
+memory allocation of 1048576 bytes failed
+  ✓ [PASS] Resource Limiter Defense verified (trapped allocation at 16MB)
+
+------------------------------------------------------------
+RESULT: ALL HOST SECURITY CONTROLS ACTIVE & VERIFIED
+============================================================
+```
+
+### 2. Static Scanner Mismatch Detection (`wasmvault inspect target/wasm_plugins/malicious-network.wasm`)
 ```text
 ============================================================
              WASMSCANNER STATIC ANALYSIS REPORT
@@ -200,9 +231,23 @@ Risk Score:        65 / 100 [HIGH (DANGER)]
 +=======================================================================================================+
 | Network Sockets | network = false | Imports socket/connect functions | HIGH - Stealth Network Attempt |
 +-----------------+-----------------+----------------------------------+--------------------------------+
+
+[DECLARED VS IMPORTED CAPABILITIES]
++-------------+--------------------+------------------+
+| Capability  | Manifest Permitted | Binary Imports   |
++=====================================================+
+| Filesystem  | Bool(false)        | Imports FS APIs  |
+|-------------+--------------------+------------------|
+| Network     | Denied             | Imports Sockets  |
+|-------------+--------------------+------------------|
+| Process     | Denied             | None             |
+|-------------+--------------------+------------------|
+| Environment | Denied             | Imports Env APIs |
++-------------+--------------------+------------------+
+============================================================
 ```
 
-### 2. Live Blocked Call Interception (`wasmvault run malicious-network.wasm`)
+### 3. Live Blocked Call Interception (`wasmvault run target/wasm_plugins/malicious-network.wasm`)
 ```text
 >>> WasmVault Capability Sandbox Invocation <<<
 Loaded Manifest for: malicious-network v1.0.0
@@ -231,10 +276,36 @@ Blocked Calls:  1
 ============================================================
 ```
 
-### 3. Resource Allocation Trap (`wasmvault run resource-bomb.wasm`)
+### 4. Memory Allocation Trap (`wasmvault run target/wasm_plugins/resource-bomb.wasm`)
 ```text
+>>> WasmVault Capability Sandbox Invocation <<<
+Loaded Manifest for: resource-bomb v1.0.0
 [resource-bomb] Starting CPU loop and memory allocation attack...
-[LIMIT EXCEEDED] Memory limit reached! (Limit: 16 MB, Attempted: 17 MB)
+[resource-bomb] Allocated 1 MB memory...
+[resource-bomb] Allocated 6 MB memory...
+[resource-bomb] Allocated 11 MB memory...
+memory allocation of 1048576 bytes failed
+
+============================================================
+              WASMVAULT EXECUTION REPORT
+============================================================
+Plugin Name:    resource-bomb
+Version:        1.0.0
+Execution Time: 11 ms
+Exit Code:      1
+Allowed Calls:  0
+Blocked Calls:  1
+============================================================
+```
+
+### 5. Path Traversal & Permission Escalation Defense (`wasmvault run target/wasm_plugins/permission-escalation.wasm`)
+```text
+>>> WasmVault Capability Sandbox Invocation <<<
+Loaded Manifest for: permission-escalation v1.0.0
+[permission-escalation] Attempting path traversal outside scoped sandbox...
+[permission-escalation] Attempting read on forbidden path: ../../../../etc/passwd
+[permission-escalation] Access denied by WASI capability boundary: No such file or directory (os error 44)
+[permission-escalation] Access denied by WASI capability boundary: Operation not permitted (os error 63)
 ```
 
 ---

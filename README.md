@@ -144,82 +144,26 @@ Intercepts unauthorized host calls, streams `MonitorEvent` notifications, and re
 
 ---
 
-### Option A: Universal `cargo` Commands (Works Identically on ALL OS & Shells)
-> **Recommended:** Works on macOS, Linux, Windows PowerShell, CMD, Git Bash, and WSL without modifying paths.
+### ⚡ 1-Click Copy & Paste Command Blocks
 
+#### 🍏 macOS & Linux (Zsh / Bash) — Single Copy-Paste Block:
 ```bash
-# 1. Clone repository & enter workspace
-git clone https://github.com/Codexia-afk/WasmVault.git
-cd WasmVault
-
-# 2. Build release binary
-cargo build --release
-
-# 3. Run host security selftest via Cargo
-cargo run --release -- selftest
-
-# 4. Inspect & Run WASM plugins via Cargo
-cargo run --release -- inspect target/wasm_plugins/malicious-network.wasm
-cargo run --release -- run target/wasm_plugins/malicious-network.wasm
+git clone https://github.com/Codexia-afk/WasmVault.git 2>/dev/null || true; cd WasmVault && rustup target add wasm32-wasip1 && cargo build --release && ./target/release/wasmvault selftest && ./scripts/build_plugins.sh && ./target/release/wasmvault inspect target/wasm_plugins/malicious-network.wasm && ./target/release/wasmvault run target/wasm_plugins/malicious-network.wasm
 ```
 
----
-
-### Option B: macOS & Linux (Bash / Zsh / sh)
-```bash
-# 1. Clone & enter workspace
-git clone https://github.com/Codexia-afk/WasmVault.git
-cd WasmVault
-
-# 2. Build release binary
-cargo build --release
-
-# 3. Run security selftest
-./target/release/wasmvault selftest
-
-# 4. Compile demo plugins & execute sandbox
-./scripts/build_plugins.sh
-./target/release/wasmvault inspect target/wasm_plugins/malicious-network.wasm
-./target/release/wasmvault run target/wasm_plugins/malicious-network.wasm
-```
-
----
-
-### Option C: Windows PowerShell & Windows Terminal (`pwsh` / `powershell`)
+#### 🪟 Windows PowerShell (`pwsh` / `powershell`) — Single Copy-Paste Block:
 ```powershell
-# 1. Clone & enter workspace
-git clone https://github.com/Codexia-afk/WasmVault.git
-cd WasmVault
-
-# 2. Build release binary
-cargo build --release
-
-# 3. Run security selftest
-.\target\release\wasmvault.exe selftest
-
-# 4. Compile demo plugins & execute sandbox
-.\scripts\build_plugins.ps1
-.\target\release\wasmvault.exe inspect target\wasm_plugins\malicious-network.wasm
-.\target\release\wasmvault.exe run target\wasm_plugins\malicious-network.wasm
+if (-not (Test-Path "Cargo.toml")) { git clone https://github.com/Codexia-afk/WasmVault.git; cd WasmVault }; rustup target add wasm32-wasip1; cargo build --release; .\target\release\wasmvault.exe selftest; .\scripts\build_plugins.ps1; .\target\release\wasmvault.exe inspect target\wasm_plugins\malicious-network.wasm; .\target\release\wasmvault.exe run target\wasm_plugins\malicious-network.wasm
 ```
 
----
-
-### Option D: Windows Command Prompt (`cmd.exe`)
+#### 💻 Windows Command Prompt (`cmd.exe`) — Single Copy-Paste Block:
 ```cmd
-:: 1. Clone & enter workspace
-git clone https://github.com/Codexia-afk/WasmVault.git
-cd WasmVault
+if not exist Cargo.toml (git clone https://github.com/Codexia-afk/WasmVault.git && cd WasmVault) & rustup target add wasm32-wasip1 & cargo build --release & target\release\wasmvault.exe selftest & target\release\wasmvault.exe inspect target\wasm_plugins\malicious-network.wasm & target\release\wasmvault.exe run target\wasm_plugins\malicious-network.wasm
+```
 
-:: 2. Build release binary
-cargo build --release
-
-:: 3. Run security selftest
-target\release\wasmvault.exe selftest
-
-:: 4. Inspect & run plugins
-target\release\wasmvault.exe inspect target\wasm_plugins\malicious-network.wasm
-target\release\wasmvault.exe run target\wasm_plugins\malicious-network.wasm
+#### 🌐 Universal `cargo` Command Block (Works on ALL Operating Systems & Shells):
+```bash
+rustup target add wasm32-wasip1 && cargo build --release && cargo run --release -- selftest && cargo run --release -- inspect target/wasm_plugins/malicious-network.wasm && cargo run --release -- run target/wasm_plugins/malicious-network.wasm
 ```
 
 ---

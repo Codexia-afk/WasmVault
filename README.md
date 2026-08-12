@@ -133,33 +133,93 @@ Intercepts unauthorized host calls, streams `MonitorEvent` notifications, and re
 
 ---
 
-## 💻 Quickstart & Installation Guide
+## 💻 Quickstart & Cross-Platform Installation Guide
 
-### Prerequisites
-- **Rust 1.97+** (`cargo`, `rustc`) - Supported natively on macOS (Apple Silicon `aarch64-apple-darwin` / Intel `x86_64`), Linux, and Windows.
+### Prerequisites (All Platforms)
+- **Rust 1.97+** (`cargo`, `rustc`) — Supported natively on macOS (Apple Silicon `aarch64-apple-darwin` / Intel `x86_64`), Linux, and Windows.
 - **WASI Compilation Target**:
   ```bash
   rustup target add wasm32-wasip1
   ```
 
-### Quickstart (macOS / Linux / Windows)
+---
+
+### Option A: Universal `cargo` Commands (Works Identically on ALL OS & Shells)
+> **Recommended:** Works on macOS, Linux, Windows PowerShell, CMD, Git Bash, and WSL without modifying paths.
+
 ```bash
 # 1. Clone repository & enter workspace
 git clone https://github.com/Codexia-afk/WasmVault.git
 cd WasmVault
 
-# 2. Build optimized release binary
+# 2. Build release binary
 cargo build --release
 
-# 3. Run instant 3-second host capability selftest
+# 3. Run host security selftest via Cargo
+cargo run --release -- selftest
+
+# 4. Inspect & Run WASM plugins via Cargo
+cargo run --release -- inspect target/wasm_plugins/malicious-network.wasm
+cargo run --release -- run target/wasm_plugins/malicious-network.wasm
+```
+
+---
+
+### Option B: macOS & Linux (Bash / Zsh / sh)
+```bash
+# 1. Clone & enter workspace
+git clone https://github.com/Codexia-afk/WasmVault.git
+cd WasmVault
+
+# 2. Build release binary
+cargo build --release
+
+# 3. Run security selftest
 ./target/release/wasmvault selftest
 
-# 4. Compile demo attack simulation plugins
+# 4. Compile demo plugins & execute sandbox
 ./scripts/build_plugins.sh
-
-# 5. Inspect static imports & run in sandbox
 ./target/release/wasmvault inspect target/wasm_plugins/malicious-network.wasm
 ./target/release/wasmvault run target/wasm_plugins/malicious-network.wasm
+```
+
+---
+
+### Option C: Windows PowerShell & Windows Terminal (`pwsh` / `powershell`)
+```powershell
+# 1. Clone & enter workspace
+git clone https://github.com/Codexia-afk/WasmVault.git
+cd WasmVault
+
+# 2. Build release binary
+cargo build --release
+
+# 3. Run security selftest
+.\target\release\wasmvault.exe selftest
+
+# 4. Compile demo plugins & execute sandbox
+.\scripts\build_plugins.ps1
+.\target\release\wasmvault.exe inspect target\wasm_plugins\malicious-network.wasm
+.\target\release\wasmvault.exe run target\wasm_plugins\malicious-network.wasm
+```
+
+---
+
+### Option D: Windows Command Prompt (`cmd.exe`)
+```cmd
+:: 1. Clone & enter workspace
+git clone https://github.com/Codexia-afk/WasmVault.git
+cd WasmVault
+
+:: 2. Build release binary
+cargo build --release
+
+:: 3. Run security selftest
+target\release\wasmvault.exe selftest
+
+:: 4. Inspect & run plugins
+target\release\wasmvault.exe inspect target\wasm_plugins\malicious-network.wasm
+target\release\wasmvault.exe run target\wasm_plugins\malicious-network.wasm
 ```
 
 ---
